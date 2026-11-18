@@ -4,6 +4,8 @@ An [HMG-API](https://github.com/Open-HMG/HMG-API) mod that runs your car's ambie
 
 By DeFlight, LLC.
 
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-0070BA?logo=paypal&logoColor=white)](https://paypal.me/deflight)
+
 > [!IMPORTANT]
 > **Tested on the Hyundai Ioniq 6 only.** Light Studio drives the two-zone ambient light (upper and lower) of a Gen5W head unit. Other cars may work; see [Compatibility](#compatibility).
 
@@ -20,6 +22,7 @@ By DeFlight, LLC.
 - [Profiles](#profiles)
 - [Good to know](#good-to-know)
 - [Requirements](#requirements) · [Compatibility](#compatibility) · [Install](#install)
+- [Support](#support)
 
 ## Light Studio on / off
 
@@ -164,6 +167,12 @@ Updates install the same way and keep your settings.
 ## Building
 
 `gen5w-light-studio/build.sh` builds the app, the engine and all the release files into `gen5w-light-studio/out/`. It needs JDK 8 to 17, Android build-tools, an API 19 `android.jar`, HMG-API's mod SDK, and your own signing keys; the variables are listed at the top of the script. A build signed with a different author key installs as a different author, so it can't update an install of the official release.
+
+## Support
+
+Gen5W Light Studio is free. If it's useful to you, you can leave a tip to support DeFlight's work on it and future mods: **[paypal.me/deflight](https://paypal.me/deflight)**. Tips are optional and don't unlock anything.
+
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-0070BA?logo=paypal&logoColor=white)](https://paypal.me/deflight)
 
 ## Credits
 
