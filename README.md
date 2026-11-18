@@ -4,7 +4,7 @@ An [HMG-API](https://github.com/Open-HMG/HMG-API) mod that runs your car's ambie
 
 By DeFlight, LLC.
 
-[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-0070BA?logo=paypal&logoColor=white)](https://paypal.me/deflight)
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-0070BA?logo=paypal&logoColor=white)](https://paypal.me/deflight) [![Sponsor on GitHub](https://img.shields.io/badge/Sponsor-GitHub-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/DeFlight)
 
 > [!IMPORTANT]
 > **Tested on the Hyundai Ioniq 6 only.** Light Studio drives the two-zone ambient light (upper and lower) of a Gen5W head unit. Other cars may work; see [Compatibility](#compatibility).
@@ -170,9 +170,9 @@ Updates install the same way and keep your settings.
 
 ## Support
 
-Gen5W Light Studio is free. If it's useful to you, you can leave a tip to support DeFlight's work on it and future mods: **[paypal.me/deflight](https://paypal.me/deflight)**. Tips are optional and don't unlock anything.
+Gen5W Light Studio is free. If it's useful to you, you can leave a tip to support DeFlight's work on it and future mods: **[PayPal](https://paypal.me/deflight)** (one-time, no account needed) or **[GitHub Sponsors](https://github.com/sponsors/DeFlight)** (one-time or monthly, with a GitHub account). Tips are optional and don't unlock anything.
 
-[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-0070BA?logo=paypal&logoColor=white)](https://paypal.me/deflight)
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-0070BA?logo=paypal&logoColor=white)](https://paypal.me/deflight) [![Sponsor on GitHub](https://img.shields.io/badge/Sponsor-GitHub-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/DeFlight)
 
 ## Credits
 
