@@ -1,10 +1,13 @@
-name: My car / it doesn't work
-description: Report a car it works on, or something that doesn't work, with what we need to fix it
+name: Something doesn't work
+description: A button, light or screen that doesn't do what it should
+labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
         Thanks for trying Gen5W Light Studio. The details below let us see what your car is doing without guessing.
+
+        **Don't post your VIN, phone number or account details.** HMG-API's Car Report leaves those out; screenshots may not, so check them first.
   - type: input
     id: car
     attributes:
@@ -57,3 +60,8 @@ body:
     attributes:
       label: HMG-API Car Report
       description: "If something doesn't work: HMG-API app > Car Report > Make report, with a USB drive plugged in, then attach the file from the drive's `HMG-API reports` folder."
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: Did it work before (which version)? Does it happen every time, or only sometimes?
