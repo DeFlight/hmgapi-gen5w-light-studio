@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "settings": [
+    { "key": "on", "type": "text", "default": "1", "private": true, "title": "Light Studio on", "description": "1: Light Studio drives the ambient light. 0: the car's own light settings, as if Light Studio weren't installed." },
+    { "key": "config", "type": "text", "default": "", "private": true, "title": "Lights", "description": "Set on Light Studio's screen: per car profile, the Everyday light, Holidays on or off, and each holiday's and My Date's light (JSON)." },
+    { "key": "see", "type": "text", "default": "", "private": true, "title": "See", "description": "Set by See on Light Studio's screen: profile:item:until (ms), a 30-second preview." },
+    { "key": "skip", "type": "text", "default": "", "private": true, "title": "Back to everyday today", "description": "Set by Back to everyday lights today: year-month-day:profile." }
+  ]
+}

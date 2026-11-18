@@ -1,0 +1,37 @@
+{
+  "id": "gen5w-light-studio",
+  "name": "Gen5W Light Studio",
+  "version": "1.0.0",
+  "hmgapi": ">=1.0.0",
+  "authors": [
+    "DeFlight, LLC"
+  ],
+  "license": "MIT",
+  "description": "Your own ambient lights on the Ioniq 6 and other Gen5W cars: an Everyday light, the holidays and three My Dates that take over on their day, per car profile. The upper and lower lights each get two colors and a style (Static, Take turns, Pulse, Pulse both, Rainbow) with a speed; Opposite or Same as upper make the lower follow the upper. Pick from the basic colors (including the car's Polar White, Moon White, Orchid Green and Jade presets, and Off) or all 64 of the car's colors. Everyday, each holiday and each My Date has its own brightness, Dimmed in dark and Brightness with speed. See tries one on the car for 30 seconds. Light Studio off: the car's own light settings come back. Open it from the Light Studio tile in the app menu.",
+  "apps": [
+    {
+      "apk": "app/LightStudio.apk",
+      "package": "com.deflight.lightstudio"
+    }
+  ],
+  "provides": {
+    "launcher": [
+      {
+        "package": "com.deflight.lightstudio",
+        "class": ".Studio",
+        "title": "Light Studio",
+        "icon": "icon/icon.png",
+        "icon_night": "icon/icon_night.png",
+        "icon_disabled": "icon/icon_disabled.png",
+        "icon_disabled_night": "icon/icon_disabled_night.png"
+      }
+    ]
+  },
+  "services": [
+    {
+      "name": "engine",
+      "script": "svc/engine.sh",
+      "user": "root"
+    }
+  ]
+}

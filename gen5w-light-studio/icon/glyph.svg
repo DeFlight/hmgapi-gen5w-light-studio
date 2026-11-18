@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- the two ambient light zones: an upper and a lower glowing line, with a spark -->
+  <rect x="6" y="30" width="74" height="12" rx="6" fill="#000"/>
+  <rect x="20" y="58" width="74" height="12" rx="6" fill="#000"/>
+  <path d="M86 14 L89 23 L98 26 L89 29 L86 38 L83 29 L74 26 L83 23 Z" fill="#000"/>
+</svg>

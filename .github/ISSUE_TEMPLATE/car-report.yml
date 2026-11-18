@@ -1,0 +1,59 @@
+name: My car / it doesn't work
+description: Report a car it works on, or something that doesn't work, with what we need to fix it
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying Gen5W Light Studio. The details below let us see what your car is doing without guessing.
+  - type: input
+    id: car
+    attributes:
+      label: Car
+      description: Make, model, year, trim and region
+      placeholder: 2025 Hyundai Ioniq 6 Limited, US
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Head unit software
+      description: Shown in HMG-API's Car Report
+      placeholder: CEEV.USA.0000.V015.012.260507
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: HMG-API and Gen5W Light Studio versions
+      placeholder: HMG-API 1.1.0, Gen5W Light Studio 1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: route
+    attributes:
+      label: Installed with
+      options: [HMG-API app, NEMESIS]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you set (page, light, colors, style) and what the lights did
+      placeholder: |
+        Everyday, Upper 1 White, Lower Same as upper, Static: both lights stay on the old color
+        Christmas, See: upper red/green take turns, lower stays off
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Light Studio log
+      description: In the HMG-API app, open Gen5W Light Studio and screenshot its log (the "service engine" part) right after it happens. Attach the screenshot here.
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: HMG-API Car Report
+      description: "If something doesn't work: HMG-API app > Car Report > Make report, with a USB drive plugged in, then attach the file from the drive's `HMG-API reports` folder."
