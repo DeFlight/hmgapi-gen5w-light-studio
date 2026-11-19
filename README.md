@@ -162,6 +162,7 @@ Updates install the same way and keep your settings.
   - the upper light's color (`setSMLRGB`) and the lower light's color (`setDualLightALL`);
   - two-color or one-color mode, Brightness with speed, brightness, Dimmed in dark and the drive-mode link.
 - **Presets** (Polar White, Moon White, Orchid Green, Jade Green) are sent with 256 added to each value, the way the car's own settings send them.
+- **The call numbers** are looked up on the car at start, by method name, from the car's own interfaces, and each method is checked for the arguments Light Studio sends. If the upper light's calls aren't all there, Light Studio leaves the lights alone; with no lower light calls it drives the upper light only. The log lists what it found.
 - **Before it first changes the lights,** the engine keeps the car's own light settings. Turning Light Studio off, turning the mod off or removing it sends them back.
 
 ## Building

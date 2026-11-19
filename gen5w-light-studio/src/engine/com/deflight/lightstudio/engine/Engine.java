@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
  * A few lines (started, what it shows, errors) go to the service's log (Log).
  *
  * The car's calls, from its own vehicle settings app and automotive framework
- * (Ioniq 6 US 260507; the same codes Light Vibes uses on the EV6):
+ * (the numbers are the Ioniq 6 US 260507's; on the car each is looked up by name, lookUp):
  *   com.hkmc.micom.system  com.hkmc.micom.ISystemService
  *     76 requestSMLStatus()            the light reports itself in the log:
  *                                      SYS_SML_STATUS_M_RESP: rH rL gH gL bH bL bright dim drivemode
@@ -52,6 +52,53 @@ public final class Engine {
 
     static final String SYS = "com.hkmc.micom.system", SYS_D = "com.hkmc.micom.ISystemService";
     static final String USM = "com.hkmc.micom.usm", USM_D = "com.hkmc.usm.IUSMService";
+
+    // ---- the car's call numbers, looked up by name on the car at start (lookUp) ----
+    // A number is a method's place in its interface, so another car's software can number the
+    // same method differently. Each is read from the car's own Stub (TRANSACTION_<name>) and its
+    // method checked for the arguments sent; nothing is ever sent by a guessed number.
+    static int SML_STATUS = -1, SML_CONFIG = -1, SML_RGB = -1;               // the upper light: required
+    static int DL_SPEED = -1, DL_COLOR = -1, DL_ALL = -1;                    // the lower light and its options: each optional
+    static int DL_R = -1, DL_G = -1, DL_B = -1, DL_GSPEED = -1, DL_GCOLOR = -1;
+
+    /** the car's numbers for every call; false (and the lights left alone) when the upper light's aren't all there */
+    static boolean lookUp() {
+        SML_STATUS = code(SYS_D, "requestSMLStatus", 76, void.class);
+        SML_CONFIG = code(SYS_D, "setSMLConfiguration", 77, void.class, int.class, int.class);
+        SML_RGB    = code(SYS_D, "setSMLRGB", 78, void.class, byte[].class, byte[].class, byte[].class);
+        DL_SPEED   = code(USM_D, "setDualLight_Speed", 0x12e, void.class, int.class);
+        DL_COLOR   = code(USM_D, "setDualLight_Color", 0x12f, void.class, int.class);
+        DL_ALL     = code(USM_D, "setDualLightALL", 0x130, void.class, int.class, int.class, int.class, int.class);
+        DL_R       = code(USM_D, "getDualLight_BottomRed", 0x1bd, int.class);
+        DL_G       = code(USM_D, "getDualLight_BottomGreen", 0x1be, int.class);
+        DL_B       = code(USM_D, "getDualLight_BottomBlue", 0x1bf, int.class);
+        DL_GSPEED  = code(USM_D, "getDualLight_Speed", 0x1c0, int.class);
+        DL_GCOLOR  = code(USM_D, "getDualLight_Color", 0x1c1, int.class);
+        if (SML_STATUS < 0 || SML_CONFIG < 0 || SML_RGB < 0) {
+            log("this car's software doesn't have the upper light's calls as Light Studio knows them: leaving the lights alone");
+            return false;
+        }
+        if (DL_ALL < 0 || DL_COLOR < 0) log("no lower light calls on this car: upper light only");
+        return true;
+    }
+
+    /** a call's number on this car, after checking the method takes what Light Studio sends; -1 if not */
+    static int code(String iface, String name, int ioniq6, Class<?> ret, Class<?>... args) {
+        try {
+            Method m = Class.forName(iface).getMethod(name, args);
+            if (m.getReturnType() != ret) { log("call " + name + ": returns " + m.getReturnType().getSimpleName() + ", not " + ret.getSimpleName() + ": not used"); return -1; }
+            java.lang.reflect.Field f = Class.forName(iface + "$Stub").getDeclaredField("TRANSACTION_" + name);
+            f.setAccessible(true);
+            int c = f.getInt(null);
+            log("call " + name + " = " + c + (c == ioniq6 ? "" : " (Ioniq 6: " + ioniq6 + ")"));
+            return c;
+        } catch (NoSuchMethodException e) {
+            log("call " + name + ": not on this car with the arguments Light Studio sends: not used");
+        } catch (Throwable e) {
+            log("call " + name + ": not found (" + e.getClass().getSimpleName() + "): not used");
+        }
+        return -1;
+    }
 
     static File saved() {
         String d = System.getenv("HMGAPI_DATA");
@@ -221,6 +268,7 @@ public final class Engine {
 
     static void run() throws Exception {
         log("Light Studio engine started");
+        if (!lookUp()) { while (true) Thread.sleep(3600000); }   // stays up, touches nothing
         Want w = null; String wk = "";
         long nextRead = 0, t0 = System.currentTimeMillis(), lastFrame = 0;
         boolean holding = false;   // take() runs once at start: it keeps a saved.txt left from before and sends the links off again
@@ -295,7 +343,7 @@ public final class Engine {
         lastSingle = single;
         try {
             if (all) {   // the car can put its links back on its own
-                config(9, 1); usm(0x12e, w.speedSync ? 2 : 1); usm(0x12f, single ? 1 : 2); config(8, w.dimDark ? 2 : 1);
+                config(9, 1); usm(DL_SPEED, w.speedSync ? 2 : 1); usm(DL_COLOR, single ? 1 : 2); config(8, w.dimDark ? 2 : 1);
             }
             if (all || top != lastTop) { top(top); lastTop = top; }
             if (bottom >= 0 && (all || bottom != lastBottom)) {   // sent in one-colour mode too, as the car does
@@ -321,8 +369,8 @@ public final class Engine {
             log("kept the car's own light settings, to put back later");
         }
         config(9, 1);              // drive-mode colour off: custom colours only show with it off
-        usm(0x12e, 1);             // brightness by speed off
-        usm(0x12f, 2);             // two colours
+        usm(DL_SPEED, 1);             // brightness by speed off
+        usm(DL_COLOR, 2);             // two colours
     }
 
     /**
@@ -332,14 +380,14 @@ public final class Engine {
     static int[] readOwner() throws Exception {
         int[] o = new int[11];
         java.util.Arrays.fill(o, -1);
-        sys(76);
+        sys(SML_STATUS);
         Thread.sleep(500);
         int[] st = lastStatus();
         if (st != null) {
             o[0] = st[1]; o[1] = st[3]; o[2] = st[5]; o[3] = st[6]; o[4] = st[7]; o[5] = st[8];
         }
-        o[6] = usmGet(0x1c1); o[7] = usmGet(0x1c0);
-        o[8] = usmGet(0x1bd); o[9] = usmGet(0x1be); o[10] = usmGet(0x1bf);
+        o[6] = usmGet(DL_GCOLOR); o[7] = usmGet(DL_GSPEED);
+        o[8] = usmGet(DL_R); o[9] = usmGet(DL_G); o[10] = usmGet(DL_B);
         return o;
     }
 
@@ -368,15 +416,16 @@ public final class Engine {
     static void restore() throws Exception {
         File f = saved();
         if (!f.exists()) { log("restore: nothing kept, nothing to put back"); return; }
+        if (!lookUp()) return;
         String[] p = read(f).trim().split("\\s+");
         int[] o = new int[p.length];
         for (int i = 0; i < p.length; i++) o[i] = num(p[i], -1);
         if (o.length >= 11) {
             config(9, 1);
             if (o[0] >= 0) { int c = o[0] << 16 | o[1] << 8 | o[2]; top(c); }   // a preset goes back with its +256
-            if (o[6] == 2 && o[8] >= 0) usm(0x130, 2, o[8], o[9], o[10]);
-            if (o[6] >= 0) usm(0x12f, o[6]);
-            if (o[7] >= 0) usm(0x12e, o[7]);
+            if (o[6] == 2 && o[8] >= 0) usm(DL_ALL, 2, o[8], o[9], o[10]);
+            if (o[6] >= 0) usm(DL_COLOR, o[6]);
+            if (o[7] >= 0) usm(DL_SPEED, o[7]);
             if (o[3] >= 1) config(5, o[3]);
             if (o[4] >= 1) config(8, o[4]);
             if (o[5] >= 1) config(9, o[5]);
@@ -395,12 +444,12 @@ public final class Engine {
 
     static void top(int rgb) throws Exception {
         int f = flag(rgb) >> 8;
-        sys(78, new byte[] { (byte) f, (byte) (rgb >> 16) }, new byte[] { (byte) f, (byte) (rgb >> 8) }, new byte[] { (byte) f, (byte) rgb });
+        sys(SML_RGB, new byte[] { (byte) f, (byte) (rgb >> 16) }, new byte[] { (byte) f, (byte) (rgb >> 8) }, new byte[] { (byte) f, (byte) rgb });
     }
 
-    static void bottom(int rgb) throws Exception { int f = flag(rgb); usm(0x130, 2, (rgb >> 16 & 255) + f, (rgb >> 8 & 255) + f, (rgb & 255) + f); }
+    static void bottom(int rgb) throws Exception { int f = flag(rgb); usm(DL_ALL, 2, (rgb >> 16 & 255) + f, (rgb >> 8 & 255) + f, (rgb & 255) + f); }
 
-    static void config(int mode, int v) throws Exception { sys(77, mode, v); }
+    static void config(int mode, int v) throws Exception { sys(SML_CONFIG, mode, v); }
 
     static IBinder sysB, usmB;
     static Method getService;
@@ -411,16 +460,19 @@ public final class Engine {
     }
 
     static void sys(int code, Object... args) throws Exception {
+        if (code < 0) throw new IOException("call not on this car");
         if (sysB == null || !sysB.isBinderAlive()) sysB = binder(SYS);
         call(sysB, SYS_D, code, false, args);
     }
 
     static void usm(int code, Object... args) throws Exception {
+        if (code < 0) return;   // not on this car
         if (usmB == null || !usmB.isBinderAlive()) usmB = binder(USM);
         call(usmB, USM_D, code, false, args);
     }
 
     static int usmGet(int code) {
+        if (code < 0) return -1;   // not on this car
         try {
             if (usmB == null || !usmB.isBinderAlive()) usmB = binder(USM);
             return call(usmB, USM_D, code, true);
