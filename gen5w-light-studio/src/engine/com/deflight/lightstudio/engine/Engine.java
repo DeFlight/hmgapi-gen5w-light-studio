@@ -65,10 +65,13 @@ public final class Engine {
      * "Car has one light" (the screen's switch, from 1.0.2): no USM call is sent, only the upper
      * light's, as Light Vibes does on the EV6. restore() still puts the owner's USM settings back.
      */
-    static boolean oneLight, restoring;
+    static boolean oneLight, restoring, noDual;
 
     /** the car's numbers for every call; false (and the lights left alone) when the upper light's aren't all there */
     static boolean lookUp() {
+        String prod = Pal.product();
+        if (Pal.kiaProduct(prod)) Pal.kia();
+        log("car " + prod + ": " + (Pal.isKia ? "Kia" : "Hyundai") + " color wheel");
         SML_STATUS = code(SYS_D, "requestSMLStatus", 76, void.class);
         SML_CONFIG = code(SYS_D, "setSMLConfiguration", 77, void.class, int.class, int.class);
         SML_RGB    = code(SYS_D, "setSMLRGB", 78, void.class, byte[].class, byte[].class, byte[].class);
@@ -86,8 +89,12 @@ public final class Engine {
             return false;
         }
         if (DL_ALL < 0 || DL_COLOR < 0) log("no lower light calls on this car: upper light only");
-        log("the car's dual light: mode " + usmGet(DL_GMODE) + ", color " + usmGet(DL_GCOLOR) + ", speed " + usmGet(DL_GSPEED)
+        int mode = usmGet(DL_GMODE), color = usmGet(DL_GCOLOR);
+        log("the car's dual light: mode " + mode + ", color " + color + ", speed " + usmGet(DL_GSPEED)
             + ", lower (" + usmGet(DL_R) + "," + usmGet(DL_G) + "," + usmGet(DL_B) + ")");
+        // a car without a dual light reports 0 for both (an EV6); the Ioniq 6 reports 1 or 2
+        noDual = DL_ALL < 0 || DL_COLOR < 0 || mode <= 0 && color <= 0;
+        if (noDual) log("no dual light on this car: one light, no USM calls");
         return true;
     }
 
@@ -441,7 +448,7 @@ public final class Engine {
     static String name(int i) { return Pal.preset(i) ? PRESET[i - 64] : "#" + i; }
 
     /** a preset's code (not on the wheel)? */
-    static boolean presetRgb(int rgb) { for (int i = 64; i <= Pal.LAST; i++) if (PAL[i] == rgb) return true; return false; }
+    static boolean presetRgb(int rgb) { if (Pal.isKia) return false; for (int i = 64; i <= Pal.LAST; i++) if (PAL[i] == rgb) return true; return false; }
 
     static String rgb(int c) { return "(" + (c >> 16 & 255) + "," + (c >> 8 & 255) + "," + (c & 255) + ")"; }
 
@@ -504,7 +511,7 @@ public final class Engine {
 
     static void usm(int code, Object... args) throws Exception {
         if (code < 0) return;   // not on this car
-        if (oneLight && !restoring) return;   // Car has one light: no USM calls
+        if ((oneLight || noDual) && !restoring) return;   // one light: no USM calls
         if (usmB == null || !usmB.isBinderAlive()) usmB = binder(USM);
         call(usmB, USM_D, code, false, args);
     }

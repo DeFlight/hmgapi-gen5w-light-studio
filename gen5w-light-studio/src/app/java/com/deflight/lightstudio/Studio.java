@@ -113,7 +113,7 @@ public final class Studio extends Activity {
 
     /** how a colour looks on screen: the 64 wheel colours by the RGB the car is sent (so they read apart);
      *  the presets (White, Moon White, Green...) by their own swatches */
-    static int hex(int i) { return i < 64 ? 0xFF000000 | Pal.RGB[i] : 0xFF000000 | HL_R[i] << 16 | HL_G[i] << 8 | HL_B[i]; }
+    static int hex(int i) { return i < 64 || Pal.isKia ? 0xFF000000 | Pal.RGB[i] : 0xFF000000 | HL_R[i] << 16 | HL_G[i] << 8 | HL_B[i]; }
 
     // ---- the mockup's state ----
     static final class Item {
@@ -123,6 +123,7 @@ public final class Studio extends Activity {
         // the car's own options, per item: Dimmed in dark, Brightness with speed (the car sets the level)
         boolean dimDark = true, speedSync;
         Item(String id, String name, String rule, int m, int d, int c1, int c2, String mode, boolean custom) {
+            c1 = Pal.near(c1); c2 = Pal.near(c2);   // a Kia: the defaults on its own wheel
             this.id = id; this.name = name; this.rule = rule; this.m = m; this.d = d; this.c1 = c1; this.c2 = c2;
             this.mode = mode; this.custom = custom; this.on = !custom; this.speed = "med"; this.bright = 10;
             this.lc1 = c2; this.lc2 = c1; this.lstyle = mode; this.lspeed = "med";
@@ -189,6 +190,7 @@ public final class Studio extends Activity {
         Object m = Profiles.manager(this);
         for (int n = 0; n < 3; n++) { pname[n] = Profiles.name(this, m, n); ppic[n] = Profiles.picture(this, m, n); }
         app = prefs().getBoolean("app", true);
+        kiaBasics();
         all64 = prefs().getBoolean("all64", false);
         oneLight = prefs().getBoolean("oneLight", false);
         restore();
@@ -1029,6 +1031,15 @@ public final class Studio extends Activity {
     static final int BLACK = -2;   // not a colour: Black turns the lights off (brightness 0, the whole cabin)
     static final int[] BASIC = { WHITE, MOON, BLACK, 22, 31, 36, GREEN, JADE, 42, 51, 59, 4 };
     static final String[] BASIC_NAMES = { "White", "Moon White", "Off", "Red", "Orange", "Yellow", "Green", "Jade", "Cyan", "Blue", "Violet", "Magenta" };
+
+    /** a Kia: its own wheel (Pal.kia), the basics on it, Moon White's slot as the Kia wheel's warm white */
+    static void kiaBasics() {
+        if (!Pal.kiaProduct(Pal.product())) return;
+        Pal.kia();
+        int[] k = Pal.KIA_BASIC;
+        BASIC[3] = k[0]; BASIC[4] = k[1]; BASIC[5] = k[2]; BASIC[8] = k[3]; BASIC[9] = k[4]; BASIC[10] = k[5]; BASIC[11] = k[6];
+        BASIC_NAMES[1] = "Warm White";
+    }
     /** how a basic's swatch looks */
     static int basicSwatch(int k) {
         int c = BASIC[k];

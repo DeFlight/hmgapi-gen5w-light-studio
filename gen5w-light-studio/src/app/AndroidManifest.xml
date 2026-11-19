@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.deflight.lightstudio"
-    android:versionCode="23"
-    android:versionName="1.0.2">
+    android:versionCode="24"
+    android:versionName="1.0.3">
     <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="19" />
     <!-- this head unit's activity manager checks GET_TASKS even in Activity.finish() -->
     <uses-permission android:name="android.permission.GET_TASKS" />
