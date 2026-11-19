@@ -7,7 +7,7 @@ By DeFlight, LLC.
 [![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-0070BA?logo=paypal&logoColor=white)](https://paypal.me/deflight) [![Sponsor on GitHub](https://img.shields.io/badge/Sponsor-GitHub-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/DeFlight)
 
 > [!IMPORTANT]
-> **Tested on the Hyundai Ioniq 6 only.** Light Studio drives the two-zone ambient light (upper and lower) of a Gen5W head unit. Other cars may work; see [Compatibility](#compatibility).
+> **Tested on the Hyundai Ioniq 6; reported working on the Kia EV6.** Light Studio drives the ambient light of a Gen5W head unit: both zones (upper and lower) where the car has two, the one light where it has one. Other cars may work; see [Compatibility](#compatibility).
 
 ![The Everyday page](docs/img/everyday.png)
 
@@ -61,7 +61,8 @@ The preview shows both lights, labelled **UPPER** and **LOWER**, and the line un
 
 ## Colors
 
-- **Basic colors:** White, Moon White, Off, Red, Orange, Yellow, Green, Jade, Cyan, Blue, Violet and Magenta. White, Moon White, Green and Jade are the car's own presets (Polar White, Moon White, Orchid Green, Jade Green).
+- **Basic colors:** White, Moon White, Off, Red, Orange, Yellow, Green, Jade, Cyan, Blue, Violet and Magenta. On a Hyundai, White, Moon White, Green and Jade are the car's own presets (Polar White, Moon White, Orchid Green, Jade Green).
+- **Kia cars** have their own 64-color wheel, and Light Studio uses it on a Kia: the colors sent, the swatches, the basics and the holiday defaults. Moon White is Warm White there, and the basics are the Kia wheel's nearest colors.
 - **Off** turns the lights off (brightness 0). Picking a color afterwards turns them back on.
 - **All 64 colors** shows every color on the car's own color wheel.
 
@@ -95,6 +96,10 @@ Everyday, each holiday and each My Date has its own brightness and options.
 
 Each of the car's profiles (Profile 1, Profile 2 and Guest) has its own lights: Everyday, holidays and My Dates. The chip next to the title shows the profile you're editing, with its name and picture from the car. **IN USE** marks the profile the car is on now. Tap the chip to edit another profile. When the car switches profile, that profile's lights take over.
 
+## Cars with one light
+
+Some cars (the Kia EV6, for one) have one ambient light, not an upper and a lower. Light Studio sees this when it starts and drives that one light with the upper light's settings. If your car has one light and it isn't detected, tick **Car has one light** on the Everyday page, next to "All 64 colors".
+
 ## Good to know
 
 - **The car's own light settings** don't do anything while Light Studio is on. Light Studio puts its own lights back within 10 seconds.
@@ -117,7 +122,9 @@ Each of the car's profiles (Profile 1, Profile 2 and Guest) has its own lights: 
 |---|---|---|
 | 2025 Hyundai Ioniq 6 Limited (US) | CEEV.USA.0000.V015.012.260507 | 1.1.0-rc.4 |
 
-**May work** on other Gen5W cars with the same two-zone ambient light, if their light uses the same calls and colors. This hasn't been tested.
+**Reported working by owners:** Kia EV6.
+
+**May work** on other Gen5W Hyundai and Kia cars with a 64-color ambient light. Light Studio looks up the light's calls on the car and leaves the lights alone if they aren't there. Genesis cars aren't known yet and get the Hyundai colors.
 
 Tried it on another car, or something doesn't work? Please [open an issue](../../issues/new?template=car-report.yml). The form asks for your car and its software, the versions, what you set and what the lights did, and a screenshot of the Light Studio log from the HMG-API app.
 
@@ -162,6 +169,7 @@ Updates install the same way and keep your settings.
   - the upper light's color (`setSMLRGB`) and the lower light's color (`setDualLightALL`);
   - two-color or one-color mode, Brightness with speed, brightness, Dimmed in dark and the drive-mode link.
 - **Presets** (Polar White, Moon White, Orchid Green, Jade Green) are sent with 256 added to each value, the way the car's own settings send them.
+- **Hyundai or Kia** comes from the car's model code (`ro.build.product`, e.g. `CVEV` for the EV6), checked against the Kia models in HMG-API's maps. A car that reports no dual light gets only the one light's calls.
 - **The call numbers** are looked up on the car at start, by method name, from the car's own interfaces, and each method is checked for the arguments Light Studio sends. If the upper light's calls aren't all there, Light Studio leaves the lights alone; with no lower light calls it drives the upper light only. The log lists what it found.
 - **Before it first changes the lights,** the engine keeps the car's own light settings. Turning Light Studio off, turning the mod off or removing it sends them back.
 
