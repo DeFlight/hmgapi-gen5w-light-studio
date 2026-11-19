@@ -190,6 +190,7 @@ public final class Studio extends Activity {
         for (int n = 0; n < 3; n++) { pname[n] = Profiles.name(this, m, n); ppic[n] = Profiles.picture(this, m, n); }
         app = prefs().getBoolean("app", true);
         all64 = prefs().getBoolean("all64", false);
+        oneLight = prefs().getBoolean("oneLight", false);
         restore();
         build();
         push();
@@ -302,6 +303,7 @@ public final class Studio extends Activity {
             }
             JSONObject all = new JSONObject();
             all.put("on", app ? "1" : "0");
+            all.put("oneLight", oneLight ? "1" : "0");
             all.put("config", cfg.toString());
             all.put("see", seeing != null && app ? editing + ":" + seeing + ":" + seeUntil : "");
             return all.toString();
@@ -704,7 +706,11 @@ public final class Studio extends Activity {
         if (inEd) edExtras(left, L, tb);
         else {
             LinearLayout gs = row(10);
+            gs.setGravity(Gravity.CENTER_VERTICAL);
             gs.addView(gridSwitch(), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, px(44)));
+            // the car's, not a light setting's: the EV6 and others have one ambient light
+            if (app) gs.addView(check(oneLight, "Car has one light", new View.OnClickListener() { @Override public void onClick(View v) {
+                oneLight = !oneLight; prefs().edit().putBoolean("oneLight", oneLight).commit(); changed(); } }), gap(24));
             left.addView(gs, top(10));
         }
         panel.addView(left, new LinearLayout.LayoutParams(px(560), ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -1013,6 +1019,8 @@ public final class Studio extends Activity {
 
     /** basic colours first; the full 64 a tap away (kept between visits) */
     boolean all64;
+    /** the car has one ambient light (EV6 and others): the engine sends no USM (dual light) calls */
+    boolean oneLight;
 
     /**
      * The basic colours: the car's own White preset and eight from its wheel. These wheel picks

@@ -1,7 +1,7 @@
 {
   "id": "gen5w-light-studio",
   "name": "Gen5W Light Studio",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "hmgapi": ">=1.0.0",
   "authors": [
     "DeFlight, LLC"

@@ -59,7 +59,13 @@ public final class Engine {
     // method checked for the arguments sent; nothing is ever sent by a guessed number.
     static int SML_STATUS = -1, SML_CONFIG = -1, SML_RGB = -1;               // the upper light: required
     static int DL_SPEED = -1, DL_COLOR = -1, DL_ALL = -1;                    // the lower light and its options: each optional
-    static int DL_R = -1, DL_G = -1, DL_B = -1, DL_GSPEED = -1, DL_GCOLOR = -1;
+    static int DL_R = -1, DL_G = -1, DL_B = -1, DL_GSPEED = -1, DL_GCOLOR = -1, DL_GMODE = -1;
+
+    /**
+     * "Car has one light" (the screen's switch, from 1.0.2): no USM call is sent, only the upper
+     * light's, as Light Vibes does on the EV6. restore() still puts the owner's USM settings back.
+     */
+    static boolean oneLight, restoring;
 
     /** the car's numbers for every call; false (and the lights left alone) when the upper light's aren't all there */
     static boolean lookUp() {
@@ -74,11 +80,14 @@ public final class Engine {
         DL_B       = code(USM_D, "getDualLight_BottomBlue", 0x1bf, int.class);
         DL_GSPEED  = code(USM_D, "getDualLight_Speed", 0x1c0, int.class);
         DL_GCOLOR  = code(USM_D, "getDualLight_Color", 0x1c1, int.class);
+        DL_GMODE   = code(USM_D, "getDualLight_Mode", 0x1c2, int.class);
         if (SML_STATUS < 0 || SML_CONFIG < 0 || SML_RGB < 0) {
             log("this car's software doesn't have the upper light's calls as Light Studio knows them: leaving the lights alone");
             return false;
         }
         if (DL_ALL < 0 || DL_COLOR < 0) log("no lower light calls on this car: upper light only");
+        log("the car's dual light: mode " + usmGet(DL_GMODE) + ", color " + usmGet(DL_GCOLOR) + ", speed " + usmGet(DL_GSPEED)
+            + ", lower (" + usmGet(DL_R) + "," + usmGet(DL_G) + "," + usmGet(DL_B) + ")");
         return true;
     }
 
@@ -195,6 +204,12 @@ public final class Engine {
         try {
             JSONObject o = settings();
             w.on = !"0".equals(o.optString("on", "1"));
+            boolean one = "1".equals(o.optString("oneLight", "0"));
+            if (one != oneLight) {
+                oneLight = one;
+                log(one ? "Car has one light: on, no USM calls" : "Car has one light: off");
+                if (one) usmBack();
+            }
             if (!w.on) return w;
             w.dimDark = !"0".equals(o.optString("dimDark", "1"));
             w.speedSync = "1".equals(o.optString("speedSync", "0"));
@@ -373,6 +388,23 @@ public final class Engine {
         usm(DL_COLOR, 2);             // two colours
     }
 
+    /** Car has one light turned on: the owner's USM settings back, as kept (only those) */
+    static void usmBack() {
+        int[] o = owner();
+        if (o == null || o.length < 11) return;
+        restoring = true;
+        try {
+            if (o[6] == 2 && o[8] >= 0) usm(DL_ALL, 2, o[8], o[9], o[10]);
+            if (o[6] >= 0) usm(DL_COLOR, o[6]);
+            if (o[7] >= 0) usm(DL_SPEED, o[7]);
+            log("put the car's own dual light settings back (color " + o[6] + ", speed " + o[7] + ")");
+        } catch (Exception e) {
+            log("dual light settings back: " + e);
+        } finally {
+            restoring = false;
+        }
+    }
+
     /**
      * the owner's light: { r, g, b, bright raw, dim, drive mode, usm colour, usm speed, bottom r, g, b },
      * -1 for what the car didn't say
@@ -414,6 +446,11 @@ public final class Engine {
     static String rgb(int c) { return "(" + (c >> 16 & 255) + "," + (c >> 8 & 255) + "," + (c & 255) + ")"; }
 
     static void restore() throws Exception {
+        restoring = true;   // the owner's USM settings go back even with Car has one light on
+        try { restoreKept(); } finally { restoring = false; }
+    }
+
+    static void restoreKept() throws Exception {
         File f = saved();
         if (!f.exists()) { log("restore: nothing kept, nothing to put back"); return; }
         if (!lookUp()) return;
@@ -467,6 +504,7 @@ public final class Engine {
 
     static void usm(int code, Object... args) throws Exception {
         if (code < 0) return;   // not on this car
+        if (oneLight && !restoring) return;   // Car has one light: no USM calls
         if (usmB == null || !usmB.isBinderAlive()) usmB = binder(USM);
         call(usmB, USM_D, code, false, args);
     }
